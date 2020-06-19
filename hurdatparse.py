@@ -3,21 +3,22 @@ import geopy
 import datetime
 import shapely
 import numpy
+import copy
 from datetime import date
 from geopy import distance
 from shapely.geometry import Polygon, Point
 from numpy import arange
 
 
-hurdatFile = open('hurdat2.csv')
-windOutputFile = open('hurWind.csv','w')
+hurdatFile = open('weatherparsing/hurdat2.csv')
+windOutputFile = open('weatherparsing/hurWind_0_3.csv','w')
 hurdatReader = csv.reader(hurdatFile)
 curStormName = 'Unknown'
 minLat = 20.0
 maxLat = 40.0
 minLon = -100.0
 maxLon = -75.0
-resolution = 0.1
+resolution = 0.3
 output = []
 for row in hurdatReader:
         if row[0].startswith("AL"):
@@ -43,6 +44,7 @@ for row in hurdatReader:
                 se34 = distance.distance(nautical=float(row[9])).destination((curHur['eyeLat'],curHur['eyeLon']),135)
                 sw34 = distance.distance(nautical=float(row[10])).destination((curHur['eyeLat'],curHur['eyeLon']),225)
                 nw34 = distance.distance(nautical=float(row[11])).destination((curHur['eyeLat'],curHur['eyeLon']),315)
+            
                 ne50 = distance.distance(nautical=float(row[12])).destination((curHur['eyeLat'],curHur['eyeLon']),45)
                 se50 = distance.distance(nautical=float(row[13])).destination((curHur['eyeLat'],curHur['eyeLon']),135)
                 sw50 = distance.distance(nautical=float(row[14])).destination((curHur['eyeLat'],curHur['eyeLon']),225)
@@ -78,7 +80,7 @@ for row in hurdatReader:
                         if gotMatch:
                             curHur['lat'] = curLat
                             curHur['lon'] = curLon
-                            output.append(curHur)
+                            output.append(copy.deepcopy(curHur))
                             #print(f"{curHur['lat']},{curHur['lon']} -> {curHur['wind']}")
 print("Writing to file")
 cw = csv.DictWriter(windOutputFile,fieldnames=output[0].keys())
